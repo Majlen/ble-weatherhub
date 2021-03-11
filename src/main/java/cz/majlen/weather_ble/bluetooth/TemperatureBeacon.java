@@ -1,4 +1,4 @@
-package cz.majlen.weather_ble;
+package cz.majlen.weather_ble.bluetooth;
 
 import com.github.hypfvieh.bluetooth.DeviceManager;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice;

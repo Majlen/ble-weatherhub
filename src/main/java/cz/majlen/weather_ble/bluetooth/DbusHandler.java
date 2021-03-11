@@ -1,4 +1,4 @@
-package cz.majlen.weather_ble;
+package cz.majlen.weather_ble.bluetooth;
 
 import org.freedesktop.dbus.handlers.AbstractPropertiesChangedHandler;
 import org.freedesktop.dbus.interfaces.Properties;

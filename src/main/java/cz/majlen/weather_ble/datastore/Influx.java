@@ -1,18 +1,16 @@
-package cz.majlen.weather_ble;
+package cz.majlen.weather_ble.datastore;
 
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.WriteApi;
 import com.influxdb.client.domain.WritePrecision;
+import cz.majlen.weather_ble.config.InfluxConfig;
 
 public class Influx {
 	private InfluxDBClient client;
-
-	//TODO: move to config file
-	private static final char[] token = "weatherhub".toCharArray();
 	
-	public Influx() {
-		InfluxDBClientFactory.create("http://localhost:8086", token);
+	public Influx(InfluxConfig config) {
+		InfluxDBClientFactory.create(config.getConnection(), config.getToken().toCharArray());
 	}
 	
 	public void write(Temperature temp) {

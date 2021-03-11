@@ -1,6 +1,11 @@
 package cz.majlen.weather_ble;
 
 import com.github.hypfvieh.bluetooth.wrapper.*;
+import cz.majlen.weather_ble.bluetooth.DbusHandler;
+import cz.majlen.weather_ble.bluetooth.TemperatureBeacon;
+import cz.majlen.weather_ble.config.Config;
+import cz.majlen.weather_ble.datastore.Influx;
+import cz.majlen.weather_ble.datastore.Temperature;
 import org.freedesktop.dbus.exceptions.DBusException;
 
 import java.util.Optional;
@@ -17,9 +22,12 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		if (args.length < 1) {
-			System.err.println("Run with <device_address> argument");
-			System.exit(-1);
+		Config config = Config.getConfig("config.json").orElseThrow();
+		Influx influx = new Influx(config.getInflux());
+		
+		for (int i = 0; i < 10; i++) {
+			Temperature temp = new Temperature("test", 10.3 + i);
+			influx.write(temp);
 		}
 		
 		TemperatureBeacon beacon;

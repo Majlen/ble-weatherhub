@@ -1,0 +1,10 @@
+{
+	"influx": {
+		"connection": "http://localhost:8086",
+		"token": "weather-ble"
+	},
+	"beacons": {
+		"mac": "F7:2C:54:37:00:10",
+		"name": "HR"
+	}
+}
