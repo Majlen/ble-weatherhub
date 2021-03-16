@@ -25,6 +25,25 @@ public class TemperatureBeacon {
 		this.btManager = DeviceManager.getInstance();
 	}
 	
+	public byte[] readAdvertisingData() {
+		for (int i = 0; i < 10; i++) {
+			List<BluetoothDevice> list = btManager.getDevices();
+			for (BluetoothDevice device : list) {
+				if (device.getAddress().equals(this.mac))
+					this.device = device;
+				
+				return this.device.getAdvertisingFlags();
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				System.err.println(e.getMessage());
+			}
+		}
+		return null;
+		
+	}
+	
 	public boolean connect() {
 		for (int i = 0; i < 10; i++) {
 			List<BluetoothDevice> list = btManager.getDevices();
