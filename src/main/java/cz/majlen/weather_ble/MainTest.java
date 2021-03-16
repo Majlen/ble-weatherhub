@@ -22,6 +22,9 @@ public class MainTest {
 		
 		while (true) {
 			byte[] bytes = beacon.readAdvertisingData();
+			if (bytes == null) {
+				System.out.println("null :/");
+			}
 			System.out.println(Hexdump.toHex(bytes));
 			Thread.sleep(1000);
 		}

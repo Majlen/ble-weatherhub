@@ -41,10 +41,10 @@ public class TemperatureBeacon {
 	public byte[] readAdvertisingData() {
 		List<BluetoothDevice> list = this.btManager.getDevices();
 		for (BluetoothDevice device : list) {
-			if (device.getAddress().equals(this.mac))
+			if (device.getAddress().equals(this.mac)) {
 				this.device = device;
-			
-			return this.device.getAdvertisingFlags();
+				return this.device.getAdvertisingFlags();
+			}
 		}
 		return null;
 	}
