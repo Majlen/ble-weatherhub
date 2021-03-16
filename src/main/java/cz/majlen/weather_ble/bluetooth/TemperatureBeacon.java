@@ -1,13 +1,17 @@
 package cz.majlen.weather_ble.bluetooth;
 
 import com.github.hypfvieh.bluetooth.DeviceManager;
+import com.github.hypfvieh.bluetooth.wrapper.BluetoothAdapter;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattCharacteristic;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattService;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.types.Variant;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -18,30 +22,31 @@ public class TemperatureBeacon {
 	
 	DeviceManager btManager;
 	BluetoothDevice device;
+	BluetoothAdapter adapter;
 	String mac;
 	
 	public TemperatureBeacon(String mac) throws DBusException {
 		this.mac = mac;
 		this.btManager = DeviceManager.getInstance();
+		this.adapter = btManager.getAdapter();
+	}
+	
+	public boolean startDiscovery(String mac) throws DBusException {
+		Map<String, Variant<?>> filters = new HashMap<>();
+		filters.put("Transport", new Variant<>("le"));
+		this.adapter.setDiscoveryFilter(filters);
+		return this.adapter.startDiscovery();
 	}
 	
 	public byte[] readAdvertisingData() {
-		for (int i = 0; i < 10; i++) {
-			List<BluetoothDevice> list = btManager.getDevices();
-			for (BluetoothDevice device : list) {
-				if (device.getAddress().equals(this.mac))
-					this.device = device;
-				
-				return this.device.getAdvertisingFlags();
-			}
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				System.err.println(e.getMessage());
-			}
+		List<BluetoothDevice> list = this.btManager.getDevices();
+		for (BluetoothDevice device : list) {
+			if (device.getAddress().equals(this.mac))
+				this.device = device;
+			
+			return this.device.getAdvertisingFlags();
 		}
 		return null;
-		
 	}
 	
 	public boolean connect() {
