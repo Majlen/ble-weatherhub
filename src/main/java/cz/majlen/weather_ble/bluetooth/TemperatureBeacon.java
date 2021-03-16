@@ -6,6 +6,7 @@ import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattCharacteristic;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattService;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.types.UInt16;
 import org.freedesktop.dbus.types.Variant;
 
 import java.text.MessageFormat;
@@ -44,6 +45,28 @@ public class TemperatureBeacon {
 			if (device.getAddress().equals(this.mac)) {
 				this.device = device;
 				return this.device.getAdvertisingFlags();
+			}
+		}
+		return null;
+	}
+	
+	public Map<String, byte[]> readServiceData() {
+		List<BluetoothDevice> list = this.btManager.getDevices();
+		for (BluetoothDevice device : list) {
+			if (device.getAddress().equals(this.mac)) {
+				this.device = device;
+				return this.device.getServiceData();
+			}
+		}
+		return null;
+	}
+	
+	public Map<UInt16, byte[]> readManufacturerData() {
+		List<BluetoothDevice> list = this.btManager.getDevices();
+		for (BluetoothDevice device : list) {
+			if (device.getAddress().equals(this.mac)) {
+				this.device = device;
+				return this.device.getManufacturerData();
 			}
 		}
 		return null;
