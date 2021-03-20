@@ -59,7 +59,7 @@ public class RuuviWeatherBeacon extends WeatherBeacon {
 		double temperature = temperatureReading * 0.005;
 		double humidity = humidityReading * 0.000025;
 		double pressure = pressureReading + 50000;
-		double battery = 1.6 + ((powerInfoReading & 0xffe0) / 1000.0);
+		double battery = 1.6 + (((powerInfoReading & 0xffe0) >> 5) / 1000.0);
 		
 		return new Measurement(temperature, humidity, pressure, battery);
 	}
