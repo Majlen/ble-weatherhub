@@ -16,17 +16,41 @@ import java.util.Map;
 import java.util.Optional;
 
 
-public class TemperatureBeacon {
+public abstract class WeatherBeacon {
 	private static final MessageFormat BLUETOOTH_UUID_FORMAT = new MessageFormat("0000{0}-0000-1000-8000-00805f9b34fb");
-	public static final String NORDIC_UART_SERVICE = "6E400001-B5A3-F393-E0A9-E50E24DCCA9E";
-	public static final String NORDIC_UART_TX_CHARACTERISTIC = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E";
+	
+	public static class Measurement {
+		double temperature;
+		double humidity;
+		double pressure;
+		double batteryVoltage;
+		
+		Measurement() {}
+		
+		Measurement(double temperature, double humidity, double pressure, double batteryVoltage) {
+			this.temperature = temperature;
+			this.humidity = humidity;
+			this.pressure = pressure;
+			this.batteryVoltage = batteryVoltage;
+		}
+		
+		@Override
+		public String toString() {
+			return "Measurement{" +
+			       "temperature=" + temperature +
+			       ", humidity=" + humidity +
+			       ", pressure=" + pressure +
+			       ", batteryVoltage=" + batteryVoltage +
+			       '}';
+		}
+	}
 	
 	DeviceManager btManager;
 	BluetoothDevice device;
 	BluetoothAdapter adapter;
 	String mac;
 	
-	public TemperatureBeacon(String mac) throws DBusException {
+	public WeatherBeacon(String mac) throws DBusException {
 		this.mac = mac;
 		this.btManager = DeviceManager.getInstance();
 		this.adapter = btManager.getAdapter();
@@ -39,37 +63,28 @@ public class TemperatureBeacon {
 		return this.adapter.startDiscovery();
 	}
 	
-	public byte[] readAdvertisingData() {
+	public Optional<Map<UInt16, byte[]>> readManufacturerData() {
 		List<BluetoothDevice> list = this.btManager.getDevices();
 		for (BluetoothDevice device : list) {
 			if (device.getAddress().equals(this.mac)) {
-				this.device = device;
-				return this.device.getAdvertisingFlags();
+				Map<UInt16, byte[]> output = this.device.getManufacturerData();
+				if (output != null) {
+					return Optional.of(output);
+				}
 			}
 		}
-		return null;
+		return Optional.empty();
 	}
 	
-	public Map<String, byte[]> readServiceData() {
-		List<BluetoothDevice> list = this.btManager.getDevices();
-		for (BluetoothDevice device : list) {
-			if (device.getAddress().equals(this.mac)) {
-				this.device = device;
-				return this.device.getServiceData();
+	public Optional<byte[]> readManufacturerData(UInt16 manufacturerId) {
+		Optional<Map<UInt16, byte[]>> data = readManufacturerData();
+		if (data.isPresent()) {
+			byte[] output = data.get().get(manufacturerId);
+			if (output != null) {
+				return Optional.of(output);
 			}
 		}
-		return null;
-	}
-	
-	public Map<UInt16, byte[]> readManufacturerData() {
-		List<BluetoothDevice> list = this.btManager.getDevices();
-		for (BluetoothDevice device : list) {
-			if (device.getAddress().equals(this.mac)) {
-				this.device = device;
-				return this.device.getManufacturerData();
-			}
-		}
-		return null;
+		return Optional.empty();
 	}
 	
 	public boolean connect() {
@@ -127,4 +142,7 @@ public class TemperatureBeacon {
 	public void registerDbusHandler(DbusHandler handler) throws DBusException {
 		this.btManager.registerPropertyHandler(handler);
 	}
+	
+	abstract public Measurement getMeasurement();
+	
 }

@@ -3,8 +3,14 @@
 		"connection": "http://localhost:8086",
 		"token": "weather-ble"
 	},
-	"beacons": {
-		"mac": "F7:2C:54:37:00:10",
-		"name": "HR"
-	}
+	"beacons": [
+		{
+			"mac": "F8:57:BF:3F:F7:10",
+			"name": "Main Room"
+		},
+		{
+			"mac": "DD:9C:7D:E5:8D:29",
+			"name": "Outdoors"
+		}
+	]
 }

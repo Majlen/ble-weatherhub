@@ -2,7 +2,8 @@ package cz.majlen.weather_ble;
 
 import com.github.hypfvieh.bluetooth.wrapper.*;
 import cz.majlen.weather_ble.bluetooth.DbusHandler;
-import cz.majlen.weather_ble.bluetooth.TemperatureBeacon;
+import cz.majlen.weather_ble.bluetooth.RuuviWeatherBeacon;
+import cz.majlen.weather_ble.bluetooth.WeatherBeacon;
 import cz.majlen.weather_ble.config.Config;
 import cz.majlen.weather_ble.datastore.Influx;
 import cz.majlen.weather_ble.datastore.Temperature;
@@ -30,17 +31,17 @@ public class Main {
 			influx.write(temp);
 		}
 		
-		TemperatureBeacon beacon;
+		WeatherBeacon beacon;
 		DbusHandler handler = new DbusHandler();
 		try {
-			beacon = new TemperatureBeacon(args[1]);
+			beacon = new RuuviWeatherBeacon(args[1]);
 			beacon.registerDbusHandler(handler);
 		} catch (DBusException e) {
 			System.err.println(e.getMessage());
 			return;
 		}
 		
-		Optional<BluetoothGattService> optionalService = beacon.getService(TemperatureBeacon.NORDIC_UART_SERVICE);
+		Optional<BluetoothGattService> optionalService = beacon.getService(RuuviWeatherBeacon.NORDIC_UART_SERVICE);
 		if (optionalService.isEmpty()) {
 			System.err.println("Couldn't find service");
 			return;
@@ -48,7 +49,7 @@ public class Main {
 		BluetoothGattService service = optionalService.get();
 		
 		Optional<BluetoothGattCharacteristic> optionalChar = beacon.getCharacteristic(
-				service, TemperatureBeacon.NORDIC_UART_TX_CHARACTERISTIC);
+				service, RuuviWeatherBeacon.NORDIC_UART_TX_CHARACTERISTIC);
 		if (optionalChar.isEmpty()) {
 			System.err.println("Couldn't find TX characteristic");
 			return;
