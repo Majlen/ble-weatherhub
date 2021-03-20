@@ -64,7 +64,7 @@ public abstract class WeatherBeacon {
 	}
 	
 	public Optional<Map<UInt16, byte[]>> readManufacturerData() {
-		List<BluetoothDevice> list = this.btManager.getDevices();
+		List<BluetoothDevice> list = this.btManager.getDevices(true);
 		for (BluetoothDevice device : list) {
 			if (device.getAddress().equals(this.mac)) {
 				Map<UInt16, byte[]> output = this.device.getManufacturerData();
