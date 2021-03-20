@@ -7,16 +7,18 @@ import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattCharacteristic;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattService;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.types.UInt16;
-import org.freedesktop.dbus.types.Variant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 
 public abstract class WeatherBeacon {
+	private static final Logger log = LoggerFactory.getLogger(WeatherBeacon.class);
+	
 	private static final MessageFormat BLUETOOTH_UUID_FORMAT = new MessageFormat("0000{0}-0000-1000-8000-00805f9b34fb");
 	
 	public static class Measurement {
@@ -56,14 +58,12 @@ public abstract class WeatherBeacon {
 		this.adapter = btManager.getAdapter();
 	}
 	
-	public boolean startDiscovery(String mac) throws DBusException {
-		Map<String, Variant<?>> filters = new HashMap<>();
-		filters.put("Transport", new Variant<>("le"));
-		this.adapter.setDiscoveryFilter(filters);
-		return this.adapter.startDiscovery();
-	}
-	
 	public Optional<Map<UInt16, byte[]>> readManufacturerData() {
+		if (!this.adapter.isDiscovering()) {
+			log.warn("Bluetooth adapter was not in discovering state. Starting discovery...");
+			BluetoothUtils.startBluetoothDiscovery(this.adapter);
+		}
+		
 		BluetoothDevice device = null;
 		if (this.device != null) {
 			device = this.device;

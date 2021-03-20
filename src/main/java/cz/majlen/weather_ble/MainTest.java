@@ -1,6 +1,7 @@
 package cz.majlen.weather_ble;
 
 import com.github.hypfvieh.bluetooth.DeviceManager;
+import cz.majlen.weather_ble.bluetooth.BluetoothUtils;
 import cz.majlen.weather_ble.bluetooth.RuuviWeatherBeacon;
 import cz.majlen.weather_ble.bluetooth.WeatherBeacon;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -13,8 +14,8 @@ public class MainTest {
 		}
 		
 		DeviceManager.createInstance(false);
+		boolean disco = BluetoothUtils.startBluetoothDiscovery();
 		WeatherBeacon beacon = new RuuviWeatherBeacon(args[0]);
-		boolean disco = beacon.startDiscovery(args[0]);
 		
 		if (!disco) {
 			System.out.println("Discovery not started :/");

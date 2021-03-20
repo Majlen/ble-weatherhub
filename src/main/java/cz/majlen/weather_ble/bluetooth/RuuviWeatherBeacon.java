@@ -1,6 +1,5 @@
 package cz.majlen.weather_ble.bluetooth;
 
-import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.types.UInt16;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
