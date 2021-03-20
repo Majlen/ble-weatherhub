@@ -16,7 +16,7 @@ public class RuuviWeatherBeacon extends WeatherBeacon {
 	public static final String NORDIC_UART_SERVICE = "6E400001-B5A3-F393-E0A9-E50E24DCCA9E";
 	public static final String NORDIC_UART_TX_CHARACTERISTIC = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E";
 	
-	public RuuviWeatherBeacon(String mac) throws DBusException {
+	public RuuviWeatherBeacon(String mac) {
 		super(mac);
 	}
 	

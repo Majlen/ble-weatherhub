@@ -50,7 +50,7 @@ public abstract class WeatherBeacon {
 	BluetoothAdapter adapter;
 	String mac;
 	
-	public WeatherBeacon(String mac) throws DBusException {
+	public WeatherBeacon(String mac) {
 		this.mac = mac;
 		this.btManager = DeviceManager.getInstance();
 		this.adapter = btManager.getAdapter();
@@ -64,13 +64,21 @@ public abstract class WeatherBeacon {
 	}
 	
 	public Optional<Map<UInt16, byte[]>> readManufacturerData() {
-		List<BluetoothDevice> list = this.btManager.getDevices(true);
-		for (BluetoothDevice device : list) {
-			if (device.getAddress().equals(this.mac)) {
-				Map<UInt16, byte[]> output = this.device.getManufacturerData();
-				if (output != null) {
-					return Optional.of(output);
+		BluetoothDevice device = null;
+		if (this.device != null) {
+			device = this.device;
+		} else {
+			for (BluetoothDevice option : this.btManager.getDevices(true)) {
+				if (option.getAddress().equals(this.mac)) {
+					device = option;
+					break;
 				}
+			}
+		}
+		if (device != null) {
+			Map<UInt16, byte[]> output = device.getManufacturerData();
+			if (output != null) {
+				return Optional.of(output);
 			}
 		}
 		return Optional.empty();
@@ -105,7 +113,7 @@ public abstract class WeatherBeacon {
 	}
 	
 	public void disconnect() {
-		device.disconnect();
+		this.device.disconnect();
 	}
 	
 	public Optional<BluetoothGattService> getService(String uuid) {
@@ -114,7 +122,7 @@ public abstract class WeatherBeacon {
 		}
 
 		for (int i = 0; i < 10; i++) {
-			BluetoothGattService service = device.getGattServiceByUuid(uuid);
+			BluetoothGattService service = this.device.getGattServiceByUuid(uuid);
 			if (service != null) {
 				return Optional.of(service);
 			}
