@@ -1,9 +1,7 @@
 package cz.majlen.weather_ble.config;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -29,10 +27,10 @@ public class Config {
 		this.beacons = beacons;
 	}
 	
-	public static Optional<Config> getConfig(String path) {
+	public static Optional<Config> getConfig(String name) {
 		ObjectMapper mapper = new ObjectMapper();
 		
-		InputStream is = Config.class.getResourceAsStream("/config.json");
+		InputStream is = Config.class.getResourceAsStream("/" + name);
 		if (is == null) {
 			// TODO: retry some common paths
 			return Optional.empty();

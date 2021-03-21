@@ -1,81 +1,67 @@
 package cz.majlen.weather_ble;
 
-import com.github.hypfvieh.bluetooth.wrapper.*;
-import cz.majlen.weather_ble.bluetooth.DbusHandler;
+import com.github.hypfvieh.bluetooth.DeviceManager;
+import cz.majlen.weather_ble.bluetooth.BluetoothUtils;
 import cz.majlen.weather_ble.bluetooth.RuuviWeatherBeacon;
 import cz.majlen.weather_ble.bluetooth.WeatherBeacon;
 import cz.majlen.weather_ble.config.Config;
 import cz.majlen.weather_ble.datastore.Influx;
-import cz.majlen.weather_ble.datastore.Temperature;
+import cz.majlen.weather_ble.datastore.WeatherMeasurement;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 
 public class Main {
-	static void printValue(byte[] value) {
-		if (value != null && value.length > 0) {
-			System.out.print("HR raw = {");
-			for (byte b : value) {
-				System.out.printf("%02x,", b);
-			}
-			System.out.print("}");
+	private static final Logger log = LoggerFactory.getLogger(Main.class);
+	
+	private static Config loadConfig() {
+		Optional<Config> optionalConfig = Config.getConfig("config.json");
+		if (optionalConfig.isEmpty()) {
+			log.error("Cannot load config");
+			System.exit(1);
 		}
+		return optionalConfig.get();
+	}
+	
+	private static void collectAndPublish(List<WeatherBeacon> beacons, Influx influx) {
+		List<WeatherMeasurement> measurements = new ArrayList<>(beacons.size());
+		for (WeatherBeacon beacon: beacons) {
+			WeatherBeacon.Measurement m = beacon.getMeasurement();
+			log.info(m.toString());
+			measurements.add(new WeatherMeasurement(beacon.getName(), m.temperature, m.humidity, m.pressure, m.batteryVoltage));
+		}
+		influx.write(measurements);
 	}
 	
 	public static void main(String[] args) {
-		Config config = Config.getConfig("config.json").orElseThrow();
+		Config config = loadConfig();
+		try {
+			DeviceManager.createInstance(false);
+		} catch (DBusException e) {
+			log.error("Unable to create Bluetooth device manager", e);
+			System.exit(1);
+		}
+		
+		List<WeatherBeacon> beacons = config.getBeacons().stream()
+				                              .map((beacon -> new RuuviWeatherBeacon(beacon.getMac(), beacon.getName())))
+				                              .collect(Collectors.toList());
 		Influx influx = new Influx(config.getInflux());
 		
-		for (int i = 0; i < 10; i++) {
-			Temperature temp = new Temperature("test", 10.3 + i);
-			influx.write(temp);
+		boolean disco = BluetoothUtils.startBluetoothDiscovery();
+		if (!disco) {
+			log.warn("Discovery not started :/");
 		}
 		
-		WeatherBeacon beacon;
-		DbusHandler handler = new DbusHandler();
-		try {
-			beacon = new RuuviWeatherBeacon(args[1]);
-			beacon.registerDbusHandler(handler);
-		} catch (DBusException e) {
-			System.err.println(e.getMessage());
-			return;
-		}
-		
-		Optional<BluetoothGattService> optionalService = beacon.getService(RuuviWeatherBeacon.NORDIC_UART_SERVICE);
-		if (optionalService.isEmpty()) {
-			System.err.println("Couldn't find service");
-			return;
-		}
-		BluetoothGattService service = optionalService.get();
-		
-		Optional<BluetoothGattCharacteristic> optionalChar = beacon.getCharacteristic(
-				service, RuuviWeatherBeacon.NORDIC_UART_TX_CHARACTERISTIC);
-		if (optionalChar.isEmpty()) {
-			System.err.println("Couldn't find TX characteristic");
-			return;
-		}
-		BluetoothGattCharacteristic characteristic = optionalChar.get();
-		handler.setDbusPath(characteristic.getDbusPath());
-
-		try {
-			characteristic.startNotify();
-		} catch (DBusException e) {
-			System.err.println(e.getMessage());
-		}
-		
-		System.out.println("Trying to read HR values.");
-		byte[] hrRaw = characteristic.getValue();
-		System.out.println("getValue()");
-		printValue(hrRaw);
-		hrRaw = handler.getValue();
-		System.out.println("handler");
-		printValue(hrRaw);
-		
-		try {
-			characteristic.stopNotify();
-		} catch (DBusException e) {
-			System.out.println(e.getMessage());
-		}
-		beacon.disconnect();
+		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+		executor.scheduleAtFixedRate(() -> collectAndPublish(beacons, influx), 0, 1, TimeUnit.SECONDS);
 	}
 }

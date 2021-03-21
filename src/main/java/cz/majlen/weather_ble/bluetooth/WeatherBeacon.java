@@ -22,10 +22,10 @@ public abstract class WeatherBeacon {
 	private static final MessageFormat BLUETOOTH_UUID_FORMAT = new MessageFormat("0000{0}-0000-1000-8000-00805f9b34fb");
 	
 	public static class Measurement {
-		double temperature;
-		double humidity;
-		double pressure;
-		double batteryVoltage;
+		public double temperature;
+		public double humidity;
+		public double pressure;
+		public double batteryVoltage;
 		
 		Measurement() {}
 		
@@ -51,9 +51,11 @@ public abstract class WeatherBeacon {
 	BluetoothDevice device;
 	BluetoothAdapter adapter;
 	String mac;
+	String name;
 	
-	public WeatherBeacon(String mac) {
+	public WeatherBeacon(String mac, String name) {
 		this.mac = mac;
+		this.name = name;
 		this.btManager = DeviceManager.getInstance();
 		this.adapter = btManager.getAdapter();
 	}
@@ -149,6 +151,10 @@ public abstract class WeatherBeacon {
 
 	public void registerDbusHandler(DbusHandler handler) throws DBusException {
 		this.btManager.registerPropertyHandler(handler);
+	}
+	
+	public String getName() {
+		return this.name;
 	}
 	
 	abstract public Measurement getMeasurement();

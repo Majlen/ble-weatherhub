@@ -15,7 +15,7 @@ public class MainTest {
 		
 		DeviceManager.createInstance(false);
 		boolean disco = BluetoothUtils.startBluetoothDiscovery();
-		WeatherBeacon beacon = new RuuviWeatherBeacon(args[0]);
+		WeatherBeacon beacon = new RuuviWeatherBeacon(args[0], "test");
 		
 		if (!disco) {
 			System.out.println("Discovery not started :/");
