@@ -22,7 +22,7 @@ public class MainTest {
 		}
 		
 		while (true) {
-			WeatherBeacon.Measurement measurement = beacon.getMeasurement();
+			WeatherBeacon.Measurement measurement = beacon.getMeasurement().orElseThrow();
 			System.out.println(measurement);
 			Thread.sleep(1000);
 		}
