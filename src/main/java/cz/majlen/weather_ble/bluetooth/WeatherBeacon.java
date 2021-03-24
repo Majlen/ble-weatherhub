@@ -157,6 +157,6 @@ public abstract class WeatherBeacon {
 		return this.name;
 	}
 	
-	abstract public Measurement getMeasurement();
+	abstract public Optional<Measurement> getMeasurement();
 	
 }

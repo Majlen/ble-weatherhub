@@ -20,16 +20,16 @@ public class RuuviWeatherBeacon extends WeatherBeacon {
 	}
 	
 	@Override
-	public Measurement getMeasurement() {
+	public Optional<Measurement> getMeasurement() {
 		Optional<byte[]> data = readManufacturerData(RUUVI_MANUFACTURER_ID);
 		if (data.isEmpty()) {
-			return new Measurement();
+			return Optional.empty();
 		}
 		try {
-			return parseMeasurement(data.get());
+			return Optional.of(parseMeasurement(data.get()));
 		} catch (ParseException e) {
 			log.error("Parsing weather data failed", e);
-			return new Measurement();
+			return Optional.empty();
 		}
 	}
 	

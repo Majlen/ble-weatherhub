@@ -35,7 +35,11 @@ public class Main {
 	private static void collectAndPublish(List<WeatherBeacon> beacons, Influx influx) {
 		List<WeatherMeasurement> measurements = new ArrayList<>(beacons.size());
 		for (WeatherBeacon beacon: beacons) {
-			WeatherBeacon.Measurement m = beacon.getMeasurement();
+			Optional<WeatherBeacon.Measurement> measurement = beacon.getMeasurement();
+			if (measurement.isEmpty()) {
+				continue;
+			}
+			WeatherBeacon.Measurement m = measurement.get();
 			log.info(m.toString());
 			measurements.add(new WeatherMeasurement(beacon.getName(), m.temperature, m.humidity, m.pressure, m.batteryVoltage));
 		}
