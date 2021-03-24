@@ -66,6 +66,6 @@ public class Main {
 		}
 		
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-		executor.scheduleAtFixedRate(() -> collectAndPublish(beacons, influx), 0, 1, TimeUnit.SECONDS);
+		executor.scheduleAtFixedRate(() -> collectAndPublish(beacons, influx), 0, 10, TimeUnit.SECONDS);
 	}
 }
