@@ -20,12 +20,15 @@ public class Influx {
 	}
 	
 	public void write(WeatherMeasurement temp) {
-		WriteApi writer = this.client.getWriteApi();
-		writer.writeMeasurement(bucket, org, WritePrecision.S, temp);
+		try (WriteApi writer = this.client.getWriteApi()) {
+			writer.writeMeasurement(bucket, org, WritePrecision.S, temp);
+		}
 	}
 	
 	public void write(List<WeatherMeasurement> temp) {
-		WriteApi writer = this.client.getWriteApi();
-		writer.writeMeasurements(bucket, org, WritePrecision.S, temp);
+		try (WriteApi writer = this.client.getWriteApi()) {
+			writer.writeMeasurements(bucket, org, WritePrecision.S, temp);
+			writer.flush();
+		}
 	}
 }
