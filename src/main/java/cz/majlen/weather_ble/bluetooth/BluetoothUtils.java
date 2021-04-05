@@ -2,6 +2,7 @@ package cz.majlen.weather_ble.bluetooth;
 
 import com.github.hypfvieh.bluetooth.DeviceManager;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothAdapter;
+import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.types.Variant;
 import org.slf4j.Logger;
@@ -27,5 +28,16 @@ public class BluetoothUtils {
 			
 		}
 		return adapter.startDiscovery();
+	}
+	
+	public static void removeAllCachedDevices() {
+		DeviceManager btManager = DeviceManager.getInstance();
+		for (BluetoothDevice device: btManager.getDevices(true)) {
+			try {
+				btManager.getAdapter().removeDevice(device.getRawDevice());
+			} catch (DBusException e) {
+				log.error("Unable to remove device", e);
+			}
+		}
 	}
 }

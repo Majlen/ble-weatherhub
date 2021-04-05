@@ -67,5 +67,8 @@ public class Main {
 		
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(() -> collectAndPublish(beacons, influx), 0, 10, TimeUnit.SECONDS);
+		// Every 15 minutes clean the cache of discovered devices, so we don't transfer a lot of historical
+		// devices every time we read the temperature
+		executor.scheduleAtFixedRate(BluetoothUtils::removeAllCachedDevices, 900, 900, TimeUnit.SECONDS);
 	}
 }
